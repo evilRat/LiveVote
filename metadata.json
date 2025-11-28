@@ -1,0 +1,5 @@
+{
+  "name": "Copy of LiveVote AI",
+  "description": "一个实时互动投票系统，具有动态二维码和 AI 驱动的民意调查生成功能。支持大屏幕展示与移动端扫码投票的双屏互动架构。",
+  "requestFramePermissions": []
+}
