@@ -18,6 +18,8 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
   const [currentToken, setCurrentToken] = useState<string>('');
   const [results, setResults] = useState<{ name: string; votes: number; fill: string }[]>([]);
   const [totalVotes, setTotalVotes] = useState(0);
+  const [simLoading, setSimLoading] = useState(false);
+  const [simMessage, setSimMessage] = useState<string | null>(null);
 
   // 1. Data Fetching (Results)
   useEffect(() => {
@@ -196,6 +198,69 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
             <p className="text-slate-400 text-sm max-w-xs mx-auto">
               二维码单次有效，扫码后自动刷新。请使用手机扫码参与投票。
             </p>
+            <div className="mt-4">
+              <Button
+                variant="primary"
+                onClick={async () => {
+                  if (simLoading) return;
+                  setSimLoading(true);
+                  setSimMessage(null);
+                  try {
+                    if (!poll || !poll.options || poll.options.length === 0) {
+                      setSimMessage('没有可用选项');
+                      return;
+                    }
+
+                    const pick = poll.options[Math.floor(Math.random() * poll.options.length)];
+
+                    // Try to vote with current token first
+                    let res = await api.vote(pollId, pick.id, currentToken);
+
+                    // If vote failed (token used/invalid), try to generate a new token and retry once
+                    if (!res.success) {
+                      const gen = await api.generateToken(pollId);
+                      if (gen.success && gen.data) {
+                        setCurrentToken(gen.data);
+                        res = await api.vote(pollId, pick.id, gen.data);
+                      }
+                    }
+
+                    if (res.success) {
+                      setSimMessage(`已为 “${pick.text}” 随机投票`);
+                      // Refresh poll data
+                      const pRes = await api.getPoll(pollId);
+                      if (pRes.success && pRes.data) {
+                        const p = pRes.data;
+                        setPoll(p);
+                        const resArr = p.options.map((opt, index) => ({
+                          name: opt.text,
+                          votes: opt.count,
+                          fill: COLORS[index % COLORS.length]
+                        }));
+                        setResults(resArr);
+                        setTotalVotes(p.options.reduce((acc, curr) => acc + curr.count, 0));
+                      }
+                    } else {
+                      setSimMessage(res.error || '模拟投票失败');
+                    }
+                  } catch (e) {
+                    console.error(e);
+                    setSimMessage('发生异常，投票未完成');
+                  } finally {
+                    setSimLoading(false);
+                    // clear message after a short delay
+                    setTimeout(() => setSimMessage(null), 2000);
+                  }
+                }}
+                isLoading={simLoading}
+              >
+                模拟投票
+              </Button>
+
+              {simMessage ? (
+                <div className="mt-2 text-sm text-slate-300">{simMessage}</div>
+              ) : null}
+            </div>
           </div>
         </div>
 
