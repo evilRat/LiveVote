@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Poll } from '../types';
 import { api } from '../services/api';
 import { Button } from './Button';
-import { Plus, BarChart2, Calendar, ChevronRight, Layout } from 'lucide-react';
+import { Plus, BarChart2, Calendar, ChevronRight, Layout, Trash } from 'lucide-react';
 
 interface PollListProps {
   onNavigate: (path: string) => void;
@@ -92,6 +92,29 @@ export const PollList: React.FC<PollListProps> = ({ onNavigate }) => {
                     icon={<BarChart2 size={18} />}
                   >
                     进入大屏
+                  </Button>
+
+                  <Button
+                    variant="danger"
+                    onClick={async () => {
+                      const ok = window.confirm('确定要删除这个活动吗？此操作不可撤销。');
+                      if (!ok) return;
+                      try {
+                        const res = await api.deletePoll(poll.id);
+                        if (res.success) {
+                          // remove from list immediately
+                          setPolls(prev => prev.filter(p => p.id !== poll.id));
+                        } else {
+                          alert(res.error || '删除失败');
+                        }
+                      } catch (e) {
+                        console.error('Delete failed', e);
+                        alert('删除时发生异常');
+                      }
+                    }}
+                    icon={<Trash size={16} />}
+                  >
+                    删除
                   </Button>
                 </div>
               </div>

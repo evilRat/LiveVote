@@ -106,4 +106,29 @@ export const db = {
 
     return true;
   }
+
+  ,
+
+  deletePoll: (id: string): boolean => {
+    try {
+      const polls = getFromStore<Poll>(KEYS.POLLS);
+      const filtered = polls.filter(p => p.id !== id);
+      saveToStore(KEYS.POLLS, filtered);
+
+      // Remove tokens associated with this poll
+      const tokens = getFromStore(KEYS.TOKENS);
+      const remainingTokens = tokens.filter((t: any) => t.pollId !== id);
+      saveToStore(KEYS.TOKENS, remainingTokens as any[]);
+
+      // Remove votes associated with this poll
+      const votes = getFromStore(KEYS.VOTES);
+      const remainingVotes = votes.filter((v: any) => v.pollId !== id);
+      saveToStore(KEYS.VOTES, remainingVotes as any[]);
+
+      return true;
+    } catch (e) {
+      console.error('Failed to delete poll', e);
+      return false;
+    }
+  }
 };

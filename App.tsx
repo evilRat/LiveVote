@@ -4,6 +4,7 @@ import { CreatePoll } from './components/CreatePoll';
 import { PollDisplay } from './components/PollDisplay';
 import { VotingInterface } from './components/VotingInterface';
 import { Route } from './types';
+import MockSettings from './components/MockSettings';
 
 const App: React.FC = () => {
   const [route, setRoute] = useState<Route>({ path: 'list', params: {} });
@@ -63,17 +64,28 @@ const App: React.FC = () => {
     window.location.hash = path;
   };
 
+  let content = null;
   switch (route.path) {
     case 'display':
-      return <PollDisplay pollId={route.params.pollId} onBack={() => navigate('/list')} />;
+      content = <PollDisplay pollId={route.params.pollId} onBack={() => navigate('/list')} />;
+      break;
     case 'vote':
-      return <VotingInterface pollId={route.params.pollId} token={route.params.token} />;
+      content = <VotingInterface pollId={route.params.pollId} token={route.params.token} />;
+      break;
     case 'create':
-      return <CreatePoll onCreated={() => navigate('/list')} onCancel={() => navigate('/list')} />;
+      content = <CreatePoll onCreated={() => navigate('/list')} onCancel={() => navigate('/list')} />;
+      break;
     case 'list':
     default:
-      return <PollList onNavigate={navigate} />;
+      content = <PollList onNavigate={navigate} />;
   }
+
+  return (
+    <div>
+      {content}
+      <MockSettings />
+    </div>
+  );
 };
 
 export default App;

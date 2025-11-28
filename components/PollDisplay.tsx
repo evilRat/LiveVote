@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Poll } from '../types';
 import { api } from '../services/api';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { Smartphone, Trophy, Users, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { Button } from './Button';
 
@@ -289,6 +289,7 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
                   itemStyle={{ color: '#fff' }}
                 />
                 <Bar dataKey="votes" radius={[0, 4, 4, 0]} animationDuration={500}>
+                  <LabelList dataKey="votes" position="right" fill="#e2e8f0" />
                   {results.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
