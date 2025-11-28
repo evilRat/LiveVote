@@ -197,7 +197,7 @@ curl -X DELETE {API_BASE}/api/polls/{pollId}
   - Token 生命周期：active -> scanned -> used。投票时 token 必须存在且未 used，投票后将 token 标记为 used 并给对应 option 的 count +1。
   - 删除 poll 时同时删除其 tokens 和 votes 关联数据。
 
-- 存储: 使用 sqlite（推荐 SQLModel 或 SQLAlchemy），并提供一个简单的初始化脚本或说明以创建表。
+- 存储: 使用 mongodb，并提供一个简单的初始化脚本。
 
 - 响应格式: 返回 JSON 包裹结构 {"success": bool, "data"?: ..., "error"?: str}，并在适当的时候设置 HTTP 状态码；在文档中给出示例请求/响应。
 
@@ -206,42 +206,3 @@ curl -X DELETE {API_BASE}/api/polls/{pollId}
 
 请输出可直接运行的代码片段文件，不要只给思路。
 ```
-
----
-
-## FastAPI 生成提示词（英文，适合代码生成器）
-
-```
-Generate a Python FastAPI backend for LiveVote with the following endpoints:
-- GET /api/polls
-- POST /api/polls
-- GET /api/polls/{poll_id}
-- DELETE /api/polls/{poll_id}
-- POST /api/polls/{poll_id}/tokens
-- GET /api/tokens/{token}
-- POST /api/tokens/{token}/scanned
-- POST /api/polls/{poll_id}/vote
-
-Requirements:
-- Use sqlite (SQLModel or SQLAlchemy) for persistence; include simple initialization/migration instructions.
-- Implement token lifecycle: active -> scanned -> used; prevent double-voting.
-- Return JSON responses in format { "success": bool, "data"?:..., "error"?: string } while also using appropriate HTTP status codes.
-- Provide runnable files (main.py, models.py if needed), requirements.txt, README with uvicorn start command, and curl examples for each endpoint.
-
-Please generate full runnable code, not just a plan.
-```
-
----
-
-## 备注 / 集成提示
-
-- 客户端当前使用 `config.makeUrl(path)` 生成请求 URI。后端部署时请确保路径以 `/api` 前缀提供资源，或将前端 `api.ts` 中的路径调整为后端实际路径。
-- 如果你希望改用纯 REST 风格（后端返回资源，错误通过 HTTP 状态表示），我可以将客户端 `services/api.ts` 改为解析非包装响应。
-
----
-
-如需，我可以：
-- 直接在仓库新增一个 `server/` 子目录，生成完整 FastAPI 项目文件（main.py、models.py、requirements.txt、README），并提供启动/联调步骤；或
-- 为项目添加一个 UI 设置页面，方便在浏览器中切换 `useMock` 与 `apiBase`。
-
-如果你要我把 FastAPI 项目生成到仓库，请确认要使用 `sqlite`（开发默认）还是内存存储；并确认是否需要 Dockerfile。

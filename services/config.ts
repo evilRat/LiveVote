@@ -1,6 +1,6 @@
 export const CONFIG_KEYS = {
-  USE_MOCK: 'false',
-  API_BASE: 'localhost:8000',
+  USE_MOCK: 'livevote_useMock',
+  API_BASE: 'livevote_apiBase',
 };
 
 export const config = {
