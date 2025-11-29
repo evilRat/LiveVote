@@ -3,14 +3,16 @@ export const CONFIG_KEYS = {
   API_BASE: 'livevote_apiBase',
 };
 
+export const DEFAULT_API_BASE = 'https://livevotebackend-production.up.railway.app';
+
 export const config = {
   getUseMock: (): boolean => {
     try {
       const v = localStorage.getItem(CONFIG_KEYS.USE_MOCK);
-      if (v === null) return true; // default to mock on
+      if (v === null) return false; // default to mock off
       return v === 'true';
     } catch (e) {
-      return true;
+      return false;
     }
   },
 
@@ -25,9 +27,9 @@ export const config = {
   getApiBase: (): string => {
     try {
       const v = localStorage.getItem(CONFIG_KEYS.API_BASE);
-      return v && v.length > 0 ? v : 'http://localhost:8000';
+      return v && v.length > 0 ? v : DEFAULT_API_BASE;
     } catch (e) {
-      return 'http://localhost:8000';
+      return DEFAULT_API_BASE;
     }
   },
 
