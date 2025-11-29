@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Poll } from '../types';
 import { api } from '../services/api';
+import { config } from '../services/config';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { Smartphone, Trophy, Users, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { Button } from './Button';
@@ -261,6 +262,16 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
                 <div className="mt-2 text-sm text-slate-300">{simMessage}</div>
               ) : null}
             </div>
+
+            {/* QR Code URL Display - Only show when enabled */}
+            {config.getShowQrUrl() && (
+              <div className="mt-6 pt-6 border-t border-slate-700">
+                <p className="text-xs text-slate-500 mb-2 uppercase tracking-wider">二维码链接</p>
+                <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700 overflow-auto">
+                  <code className="text-xs text-slate-300 break-all font-mono">{voteUrl}</code>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

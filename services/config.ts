@@ -1,6 +1,7 @@
 export const CONFIG_KEYS = {
   USE_MOCK: 'livevote_useMock',
   API_BASE: 'livevote_apiBase',
+  SHOW_QR_URL: 'livevote_showQrUrl',
 };
 
 export const DEFAULT_API_BASE = 'https://livevotebackend-production.up.railway.app';
@@ -45,6 +46,24 @@ export const config = {
     const base = config.getApiBase().replace(/\/+$/, '');
     const p = path.replace(/^\/+/, '');
     return `${base}/${p}`;
+  },
+
+  getShowQrUrl: (): boolean => {
+    try {
+      const v = localStorage.getItem(CONFIG_KEYS.SHOW_QR_URL);
+      if (v === null) return false; // default to hidden
+      return v === 'true';
+    } catch (e) {
+      return false;
+    }
+  },
+
+  setShowQrUrl: (val: boolean) => {
+    try {
+      localStorage.setItem(CONFIG_KEYS.SHOW_QR_URL, val ? 'true' : 'false');
+    } catch (e) {
+      console.error('Failed to save config', e);
+    }
   }
 };
 
