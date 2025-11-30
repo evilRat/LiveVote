@@ -4,7 +4,7 @@ export const CONFIG_KEYS = {
   SHOW_QR_URL: 'livevote_showQrUrl',
 };
 
-export const DEFAULT_API_BASE = 'https://livevotebackend-production.up.railway.app';
+export const DEFAULT_API_BASE = 'https://livevote.xyz';
 
 export const config = {
   getUseMock: (): boolean => {
