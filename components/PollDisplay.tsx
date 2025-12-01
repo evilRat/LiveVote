@@ -127,14 +127,14 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
 
   // 添加获取微信二维码的effect
   useEffect(() => {
-    if (!pollId) return;
+    if (!pollId || !currentToken) return;
     
     let isMounted = true;
     
     const fetchWechatQRCode = async () => {
       setLoadingWechatQR(true);
       try {
-        const res = await api.generateWechatQRCode(pollId);
+        const res = await api.generateWechatQRCode(pollId, currentToken);
         if (isMounted && res.success && res.data) {
           setWechatQRCode(res.data.qr_image);
           setWechatQRData({
