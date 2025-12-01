@@ -19,26 +19,19 @@ export const VotingInterface: React.FC<VotingInterfaceProps> = ({ pollId, token 
     let isMounted = true;
 
     const init = async () => {
-      // 1. Validate Token
-      const tokenRes = await api.checkTokenStatus(token);
+      // 使用新的聚合API：检查token状态、标记为已扫描、获取投票数据
+      const response = await api.prepareVote(token);
       
       if (!isMounted) return;
 
-      if (!tokenRes.success || !tokenRes.data || tokenRes.data.pollId !== pollId || tokenRes.data.status === 'used') {
-        setStatus('invalid');
-        return;
-      }
-
-      // 2. Mark as scanned to inform Display
-      if (tokenRes.data.status === 'active') {
-        await api.markTokenScanned(token);
-      }
-
-      // 3. Load Poll
-      const pollRes = await api.getPoll(pollId);
-      if (isMounted && pollRes.success && pollRes.data) {
-        setPoll(pollRes.data);
-        setStatus('active');
+      if (response.success && response.data) {
+        // 验证返回的pollId是否与当前pollId匹配
+        if (response.data.id === pollId) {
+          setPoll(response.data);
+          setStatus('active');
+        } else {
+          setStatus('invalid');
+        }
       } else {
         setStatus('invalid');
       }

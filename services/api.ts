@@ -122,6 +122,34 @@ export const api = {
 
     return remoteFetch<boolean>(`/api/polls/${encodeURIComponent(pollId)}`, { method: 'DELETE' });
   },
+
+  // 聚合API：准备投票（检查token状态、标记为已扫描、获取投票数据）
+  prepareVote: async (tokenStr: string): Promise<ApiResponse<Poll>> => {
+    if (config.getUseMock()) {
+      // 模拟聚合操作
+      const token = db.getToken(tokenStr);
+      if (!token) {
+        return simulateNetwork({ success: false, error: 'Token 不存在' });
+      }
+      
+      if (token.status !== 'active') {
+        return simulateNetwork({ success: false, error: `Token 状态无效：${token.status}` });
+      }
+      
+      // 标记为已扫描
+      db.updateTokenStatus(tokenStr, 'scanned');
+      
+      // 获取投票数据
+      const poll = db.getPollById(token.pollId);
+      if (!poll) {
+        return simulateNetwork({ success: false, error: '关联的投票活动不存在' });
+      }
+      
+      return simulateNetwork({ success: true, data: poll });
+    }
+    
+    return remoteFetch<Poll>(`/api/vote/prepare/${encodeURIComponent(tokenStr)}`);
+  },
 };
 
 export default api;
