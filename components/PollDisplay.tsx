@@ -156,7 +156,7 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
     return () => {
       isMounted = false;
     };
-  }, [pollId]);
+  }, [pollId, currentToken]); // 添加currentToken作为依赖项
 
   if (error) {
     return (
@@ -183,6 +183,59 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
   const voteUrl = `${window.location.origin}${window.location.pathname}#/vote/${pollId}/${currentToken}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(voteUrl)}&bgcolor=ffffff&color=0f172a`;
   const wechatUrl = wechatQRData ? `pages/vote/index?pollId=${wechatQRData.poll_id}&token=${wechatQRData.token}` : '';
+
+  // 修改模拟投票的逻辑，确保在投票后刷新微信二维码
+  const handleSimulateVote = async () => {
+    if (simLoading) return;
+    setSimLoading(true);
+    setSimMessage(null);
+    try {
+      if (!poll || !poll.options || poll.options.length === 0) {
+        setSimMessage('没有可用选项');
+        return;
+      }
+
+      const pick = poll.options[Math.floor(Math.random() * poll.options.length)];
+
+      // Try to vote with current token first
+      let res = await api.vote(pollId, pick.id, currentToken);
+
+      // If vote failed (token used/invalid), try to generate a new token and retry once
+      if (!res.success) {
+        const gen = await api.generateToken(pollId);
+        if (gen.success && gen.data) {
+          setCurrentToken(gen.data);
+          res = await api.vote(pollId, pick.id, gen.data);
+        }
+      }
+
+      if (res.success) {
+        setSimMessage(`已为 “${pick.text}” 随机投票`);
+        // Refresh poll data
+        const pRes = await api.getPoll(pollId);
+        if (pRes.success && pRes.data) {
+          const p = pRes.data;
+          setPoll(p);
+          const resArr = p.options.map((opt, index) => ({
+            name: opt.text,
+            votes: opt.count,
+            fill: COLORS[index % COLORS.length]
+          }));
+          setResults(resArr);
+          setTotalVotes(p.options.reduce((acc, curr) => acc + curr.count, 0));
+        }
+      } else {
+        setSimMessage(res.error || '模拟投票失败');
+      }
+    } catch (e) {
+      console.error(e);
+      setSimMessage('发生异常，投票未完成');
+    } finally {
+      setSimLoading(false);
+      // clear message after a short delay
+      setTimeout(() => setSimMessage(null), 2000);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-900 text-white p-6 flex flex-col">
@@ -308,57 +361,7 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
             <div className="flex flex-col items-center">
               <Button
                 variant="primary"
-                onClick={async () => {
-                  if (simLoading) return;
-                  setSimLoading(true);
-                  setSimMessage(null);
-                  try {
-                    if (!poll || !poll.options || poll.options.length === 0) {
-                      setSimMessage('没有可用选项');
-                      return;
-                    }
-
-                    const pick = poll.options[Math.floor(Math.random() * poll.options.length)];
-
-                    // Try to vote with current token first
-                    let res = await api.vote(pollId, pick.id, currentToken);
-
-                    // If vote failed (token used/invalid), try to generate a new token and retry once
-                    if (!res.success) {
-                      const gen = await api.generateToken(pollId);
-                      if (gen.success && gen.data) {
-                        setCurrentToken(gen.data);
-                        res = await api.vote(pollId, pick.id, gen.data);
-                      }
-                    }
-
-                    if (res.success) {
-                      setSimMessage(`已为 “${pick.text}” 随机投票`);
-                      // Refresh poll data
-                      const pRes = await api.getPoll(pollId);
-                      if (pRes.success && pRes.data) {
-                        const p = pRes.data;
-                        setPoll(p);
-                        const resArr = p.options.map((opt, index) => ({
-                          name: opt.text,
-                          votes: opt.count,
-                          fill: COLORS[index % COLORS.length]
-                        }));
-                        setResults(resArr);
-                        setTotalVotes(p.options.reduce((acc, curr) => acc + curr.count, 0));
-                      }
-                    } else {
-                      setSimMessage(res.error || '模拟投票失败');
-                    }
-                  } catch (e) {
-                    console.error(e);
-                    setSimMessage('发生异常，投票未完成');
-                  } finally {
-                    setSimLoading(false);
-                    // clear message after a short delay
-                    setTimeout(() => setSimMessage(null), 2000);
-                  }
-                }}
+                onClick={handleSimulateVote} // 使用新的处理函数
                 isLoading={simLoading}
               >
                 模拟投票
@@ -430,4 +433,5 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
       </div>
     </div>
   );
+
 };

@@ -23,7 +23,9 @@ export const WechatQRTest: React.FC = () => {
     setError(null);
     
     try {
-      const res = await api.generateWechatQRCode(pollId);
+      // 为测试目的生成一个临时token
+      const tempToken = 'test_token_' + Date.now();
+      const res = await api.generateWechatQRCode(pollId, tempToken);
       if (res.success && res.data) {
         setQrData(res.data);
       } else {
