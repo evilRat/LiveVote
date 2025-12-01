@@ -4,7 +4,7 @@ export const CONFIG_KEYS = {
   SHOW_QR_URL: 'livevote_showQrUrl',
 };
 
-export const DEFAULT_API_BASE = 'https://livevote.xyz';
+export const DEFAULT_API_BASE = 'https://zyz.qdcto.com';
 
 export const config = {
   getUseMock: (): boolean => {
