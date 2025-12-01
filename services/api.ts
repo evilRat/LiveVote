@@ -111,6 +111,22 @@ export const api = {
     });
   },
 
+  // WeChat Mini Program QR Code
+  generateWechatQRCode: async (pollId: string, currentToken: string): Promise<ApiResponse<{qr_image: string, poll_id: string, token: string}>> => {
+    if (config.getUseMock()) {
+      // Mock implementation
+      return simulateNetwork({ 
+        success: true, 
+        data: {
+          qr_image: `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(`pages/vote/index?pollId=${pollId}&token=${currentToken}`)}`,
+          poll_id: pollId,
+          token: currentToken
+        } 
+      });
+    }
+    return remoteFetch<{qr_image: string, poll_id: string, token: string}>(`/api/polls/${encodeURIComponent(pollId)}/${encodeURIComponent(currentToken)}/wechat-qr`, { method: 'POST' });
+  },
+
   deletePoll: async (pollId: string): Promise<ApiResponse<boolean>> => {
     if (config.getUseMock()) {
       const success = db.deletePoll(pollId as string);

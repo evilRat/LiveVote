@@ -28,7 +28,7 @@ export interface QRToken {
 }
 
 export interface Route {
-  path: 'list' | 'create' | 'display' | 'vote';
+  path: 'list' | 'create' | 'display' | 'vote' | 'wechat-qr-test';
   params: Record<string, string>;
 }
 

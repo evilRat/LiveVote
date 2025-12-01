@@ -3,6 +3,7 @@ import { PollList } from './components/PollList';
 import { CreatePoll } from './components/CreatePoll';
 import { PollDisplay } from './components/PollDisplay';
 import { VotingInterface } from './components/VotingInterface';
+import { WechatQRTest } from './components/WechatQRTest'; // 添加导入
 import { Route } from './types';
 import MockSettings from './components/MockSettings';
 
@@ -50,6 +51,12 @@ const App: React.FC = () => {
         return;
       }
 
+      // /wechat-qr-test (添加微信二维码测试页面路由)
+      if (hash === '/wechat-qr-test') {
+        setRoute({ path: 'wechat-qr-test', params: {} });
+        return;
+      }
+
       setRoute({ path: 'list', params: {} });
     };
 
@@ -74,6 +81,9 @@ const App: React.FC = () => {
       break;
     case 'create':
       content = <CreatePoll onCreated={() => navigate('/list')} onCancel={() => navigate('/list')} />;
+      break;
+    case 'wechat-qr-test': // 添加微信二维码测试页面
+      content = <WechatQRTest />;
       break;
     case 'list':
     default:
