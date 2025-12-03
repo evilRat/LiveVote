@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Poll } from '../types';
+import { Poll, PollOptionWithCount } from '../types';
 import { api } from '../services/api';
 import { config } from '../services/config';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
@@ -40,7 +40,7 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
           
           const res = p.options.map((opt, index) => ({
             name: opt.text,
-            votes: opt.count,
+            votes: opt.count,  // 现在从后端获取的是实时计算的票数
             fill: COLORS[index % COLORS.length]
           }));
           
@@ -218,7 +218,7 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
           setPoll(p);
           const resArr = p.options.map((opt, index) => ({
             name: opt.text,
-            votes: opt.count,
+            votes: opt.count,  // 现在从后端获取的是实时计算的票数
             fill: COLORS[index % COLORS.length]
           }));
           setResults(resArr);

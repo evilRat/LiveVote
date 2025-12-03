@@ -28,11 +28,56 @@ const saveToStore = <T>(key: string, data: T[]) => {
 
 export const db = {
   getPolls: (): Poll[] => {
-    return getFromStore<Poll>(KEYS.POLLS).sort((a, b) => b.createdAt - a.createdAt);
+    const polls = getFromStore<Poll>(KEYS.POLLS);
+    
+    // 对每个 poll 动态计算票数
+    return polls.sort((a, b) => b.createdAt - a.createdAt).map(poll => {
+      const votes = getFromStore<VoteRecord>(KEYS.VOTES);
+      const pollVotes = votes.filter(v => v.pollId === poll.id);
+      
+      // 计算每个选项的票数
+      const voteCounts: Record<string, number> = {};
+      pollVotes.forEach(vote => {
+        voteCounts[vote.optionId] = (voteCounts[vote.optionId] || 0) + 1;
+      });
+      
+      // 创建带有实时票数的新选项数组
+      const optionsWithCounts = poll.options.map(option => ({
+        ...option,
+        count: voteCounts[option.id] || 0
+      }));
+      
+      return {
+        ...poll,
+        options: optionsWithCounts
+      };
+    });
   },
 
   getPollById: (id: string): Poll | undefined => {
-    return getFromStore<Poll>(KEYS.POLLS).find(p => p.id === id);
+    const poll = getFromStore<Poll>(KEYS.POLLS).find(p => p.id === id);
+    if (!poll) return undefined;
+    
+    // 动态计算每个选项的票数
+    const votes = getFromStore<VoteRecord>(KEYS.VOTES);
+    const pollVotes = votes.filter(v => v.pollId === id);
+    
+    // 计算每个选项的票数
+    const voteCounts: Record<string, number> = {};
+    pollVotes.forEach(vote => {
+      voteCounts[vote.optionId] = (voteCounts[vote.optionId] || 0) + 1;
+    });
+    
+    // 创建带有实时票数的新选项数组
+    const optionsWithCounts = poll.options.map(option => ({
+      ...option,
+      count: voteCounts[option.id] || 0
+    }));
+    
+    return {
+      ...poll,
+      options: optionsWithCounts
+    };
   },
 
   createPoll: (poll: Poll): Poll => {
@@ -93,21 +138,13 @@ export const db = {
     votes.push({ pollId, optionId, timestamp: Date.now() });
     saveToStore(KEYS.VOTES, votes);
 
-    // 3. Update Poll Count
-    const polls = getFromStore<Poll>(KEYS.POLLS);
-    const pollIdx = polls.findIndex(p => p.id === pollId);
-    if (pollIdx !== -1) {
-      const optIdx = polls[pollIdx].options.findIndex(o => o.id === optionId);
-      if (optIdx !== -1) {
-        polls[pollIdx].options[optIdx].count += 1;
-        saveToStore(KEYS.POLLS, polls);
-      }
-    }
+    // 3. 不再更新 Poll Count，因为现在通过查询 votes 集合实时计算
+    
+    // 注意：在真实的后端实现中，我们会通过聚合 votes 集合来计算票数
+    // 这里我们只是模拟投票过程，不更新 poll 中的 count 字段
 
     return true;
-  }
-
-  ,
+  },
 
   deletePoll: (id: string): boolean => {
     try {

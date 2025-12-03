@@ -1,13 +1,17 @@
 export interface PollOption {
   id: string;
   text: string;
+}
+
+// 用于表示后端返回的带有票数的选项
+export interface PollOptionWithCount extends PollOption {
   count: number;
 }
 
 export interface Poll {
   id: string;
   title: string;
-  options: PollOption[];
+  options: PollOptionWithCount[];
   createdAt: number;
   isActive: boolean;
 }

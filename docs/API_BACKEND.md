@@ -18,12 +18,14 @@
   "id": "string",
   "title": "string",
   "options": [
-    { "id": "string", "text": "string", "count": 0 }
+    { "id": "string", "text": "string" }
   ],
   "createdAt": 1672531200000,
   "isActive": true
 }
 ```
+
+注意：后端 API 在返回 Poll 数据时会动态计算并添加每个选项的票数（count 字段），但在存储时不保存该字段。
 
 - QRToken
 
@@ -47,6 +49,29 @@
 ```
 
 注：服务也应设置合适的 HTTP 状态码（200/201/400/404/500），但返回体建议包含上述结构以便客户端解析。
+
+---
+
+## API 端点清单
+
+- GET /api/polls
+- POST /api/polls
+- GET /api/polls/{poll_id}
+- DELETE /api/polls/{poll_id}
+- POST /api/polls/{poll_id}/tokens
+- GET /api/tokens/{token}
+- POST /api/tokens/{token}/scanned
+- POST /api/polls/{poll_id}/vote
+
+- 功能与约束:
+  - Poll 包含 id/title/options(created with id/text)/createdAt/isActive。
+  - 后端通过聚合 votes 集合动态计算每个选项的票数，不再在 polls 集合中存储冗余的 count 字段。
+  - Token 生命周期：active -> scanned -> used。投票时 token 必须存在且未 used，投票后将 token 标记为 used。
+  - 删除 poll 时同时删除其 tokens 和 votes 关联数据。
+
+- 存储: 使用 mongodb，并提供一个简单的初始化脚本。
+
+- 响应格式: 返回 JSON 包裹结构 {"success": bool, "data"?: ..., "error"?: str}，并在适当的时候设置 HTTP 状态码；在文档中给出示例请求/响应。
 
 ---
 
@@ -193,7 +218,7 @@ curl -X DELETE {API_BASE}/api/polls/{pollId}
   - POST /api/polls/{poll_id}/vote
 
 - 功能与约束:
-  - Poll 包含 id/title/options(created with id/text/count)/createdAt/isActive。
+  - Poll 包含 id/title/options(created with id/text)/createdAt/isActive。
   - Token 生命周期：active -> scanned -> used。投票时 token 必须存在且未 used，投票后将 token 标记为 used 并给对应 option 的 count +1。
   - 删除 poll 时同时删除其 tokens 和 votes 关联数据。
 

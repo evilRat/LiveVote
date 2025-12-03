@@ -53,7 +53,7 @@ export const api = {
       const newPoll: Poll = {
         id: Date.now().toString(),
         title,
-        options: options.map((text, i) => ({ id: `opt_${Date.now()}_${i}`, text, count: 0 })),
+        options: options.map((text, i) => ({ id: `opt_${Date.now()}_${i}`, text, count: 0 })), // mock 模式下仍需包含 count 字段
         createdAt: Date.now(),
         isActive: true,
       };
