@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from './Button';
-import config from '../services/config';
+import { config } from '../services/config';
 import { Settings, ExternalLink } from 'lucide-react';
 
 export const MockSettings: React.FC = () => {
@@ -8,12 +8,14 @@ export const MockSettings: React.FC = () => {
   const [useMock, setUseMockState] = useState<boolean>(true);
   const [apiBase, setApiBaseState] = useState<string>('');
   const [showQrUrl, setShowQrUrlState] = useState<boolean>(false);
+  const [showSimulateVote, setShowSimulateVoteState] = useState<boolean>(false); // 新增状态
   const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
     setUseMockState(config.getUseMock());
     setApiBaseState(config.getApiBase());
     setShowQrUrlState(config.getShowQrUrl());
+    setShowSimulateVoteState(config.getShowSimulateVote()); // 初始化状态
   }, []);
 
   const save = () => {
@@ -21,6 +23,7 @@ export const MockSettings: React.FC = () => {
       config.setUseMock(useMock);
       config.setApiBase(apiBase);
       config.setShowQrUrl(showQrUrl);
+      config.setShowSimulateVote(showSimulateVote); // 保存新配置
       setMsg('已保存');
       setTimeout(() => setMsg(null), 2000);
     } catch (e) {
@@ -60,6 +63,16 @@ export const MockSettings: React.FC = () => {
                   onChange={(e) => setShowQrUrlState(e.target.checked)}
                 />
               </label>
+              
+              {/* 新增模拟投票开关 */}
+              <label className="flex items-center justify-between mb-3">
+                <span className="text-sm">展示模拟投票按钮</span>
+                <input
+                  type="checkbox"
+                  checked={showSimulateVote}
+                  onChange={(e) => setShowSimulateVoteState(e.target.checked)}
+                />
+              </label>
 
               <label className="block text-sm text-slate-300">后端 API 域名</label>
               <input
@@ -70,7 +83,12 @@ export const MockSettings: React.FC = () => {
 
               <div className="mt-3 flex items-center gap-2">
                 <Button variant="secondary" onClick={save}>保存</Button>
-                <Button variant="ghost" onClick={() => { setUseMockState(config.getUseMock()); setApiBaseState(config.getApiBase()); setShowQrUrlState(config.getShowQrUrl()); }}>重置</Button>
+                <Button variant="ghost" onClick={() => { 
+                  setUseMockState(config.getUseMock()); 
+                  setApiBaseState(config.getApiBase()); 
+                  setShowQrUrlState(config.getShowQrUrl());
+                  setShowSimulateVoteState(config.getShowSimulateVote()); // 重置状态
+                }}>重置</Button>
                 <a className="ml-auto text-xs text-slate-300 flex items-center gap-1" href="/docs/API_BACKEND.md" target="_blank" rel="noreferrer">
                   文档
                   <ExternalLink size={14} />

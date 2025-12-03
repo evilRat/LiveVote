@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Poll, PollOptionWithCount } from '../types';
 import { api } from '../services/api';
-import { config } from '../services/config';
+import { config } from '../services/config'; // 确保导入config
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { Smartphone, Trophy, Users, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { Button } from './Button';
@@ -273,30 +273,7 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
           <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 shadow-xl backdrop-blur-sm">
             <h3 className="text-xl font-semibold mb-4 text-center">扫码投票</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Web QR Code */}
-              <div className="flex flex-col items-center">
-                <div className="relative group mb-3">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-pink-500 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-                  <div className="relative bg-white p-3 rounded-xl shadow-2xl">
-                    <img 
-                      src={qrUrl} 
-                      alt="网页投票二维码" 
-                      className="w-40 h-40 object-contain"
-                      key={currentToken} // Force re-render on token change
-                    />
-                  </div>
-                </div>
-                
-                <div className="text-center">
-                  <div className="inline-flex items-center gap-1 bg-indigo-500/10 text-indigo-300 px-2 py-1 rounded-full border border-indigo-500/20 text-xs">
-                    <Smartphone size={14} />
-                    <span className="font-medium">浏览器扫码</span>
-                  </div>
-                  <p className="text-slate-400 text-xs mt-2">使用手机浏览器扫描</p>
-                </div>
-              </div>
-              
+            <div className="grid">              
               {/* WeChat Mini Program QR Code */}
               <div className="flex flex-col items-center">
                 {loadingWechatQR ? (
@@ -357,20 +334,23 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
                 二维码单次有效，扫码后自动刷新。请使用对应方式扫码参与投票。
               </p>
             </div>
-            {/* Simulate Vote Button */}
-            <div className="flex flex-col items-center">
-              <Button
-                variant="primary"
-                onClick={handleSimulateVote} // 使用新的处理函数
-                isLoading={simLoading}
-              >
-                模拟投票
-              </Button>
+            
+            {/* Simulate Vote Button - 根据配置决定是否显示 */}
+            {config.getShowSimulateVote() && (
+              <div className="flex flex-col items-center mt-6">
+                <Button
+                  variant="primary"
+                  onClick={handleSimulateVote} // 使用新的处理函数
+                  isLoading={simLoading}
+                >
+                  模拟投票
+                </Button>
 
-              {simMessage ? (
-                <div className="mt-2 text-sm text-slate-300">{simMessage}</div>
-              ) : null}
-            </div>
+                {simMessage ? (
+                  <div className="mt-2 text-sm text-slate-300">{simMessage}</div>
+                ) : null}
+              </div>
+            )}
           </div>
           
           {/* QR Code URLs Display - Only show when enabled */}

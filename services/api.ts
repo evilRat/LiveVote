@@ -1,6 +1,6 @@
 import { Poll, ApiResponse, QRToken } from '../types';
 import { db } from './mockDb';
-import config from './config';
+import { config } from './config';
 
 // Helper to simulate network latency (100ms - 500ms)
 const simulateNetwork = <T>(data: T): Promise<T> => {

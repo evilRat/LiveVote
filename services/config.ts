@@ -2,6 +2,7 @@ export const CONFIG_KEYS = {
   USE_MOCK: 'livevote_useMock',
   API_BASE: 'livevote_apiBase',
   SHOW_QR_URL: 'livevote_showQrUrl',
+  SHOW_SIMULATE_VOTE: 'livevote_showSimulateVote', // 新增模拟投票开关配置键
 };
 
 // export const DEFAULT_API_BASE = 'https://zyz.qdcto.com';
@@ -65,7 +66,24 @@ export const config = {
     } catch (e) {
       console.error('Failed to save config', e);
     }
+  },
+  
+  // 新增模拟投票开关的getter和setter
+  getShowSimulateVote: (): boolean => {
+    try {
+      const v = localStorage.getItem(CONFIG_KEYS.SHOW_SIMULATE_VOTE);
+      if (v === null) return false; // default to hidden
+      return v === 'true';
+    } catch (e) {
+      return false;
+    }
+  },
+
+  setShowSimulateVote: (val: boolean) => {
+    try {
+      localStorage.setItem(CONFIG_KEYS.SHOW_SIMULATE_VOTE, val ? 'true' : 'false');
+    } catch (e) {
+      console.error('Failed to save config', e);
+    }
   }
 };
-
-export default config;
