@@ -52,7 +52,15 @@ export const VotingInterface: React.FC<VotingInterfaceProps> = ({ pollId, token 
   const handleSubmit = async () => {
     if (selectedOption && poll) {
       setSubmitting(true);
-      const res = await api.vote(pollId, selectedOption, token);
+      // For web version, we need to generate or retrieve a unique identifier for the user
+      // In a real implementation, you might want to use localStorage or another mechanism
+      let openId = localStorage.getItem('user_open_id');
+      if (!openId) {
+        // Generate a unique ID for web users
+        openId = 'web_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('user_open_id', openId);
+      }
+      const res = await api.vote(pollId, selectedOption, token, openId);
       setSubmitting(false);
       
       if (res.success) {

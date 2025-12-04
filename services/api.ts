@@ -158,7 +158,7 @@ export const api = {
   },
 
   // Voting
-  vote: async (pollId: string, optionId: string, tokenStr: string): Promise<ApiResponse<boolean>> => {
+  vote: async (pollId: string, optionId: string, tokenStr: string, openId?: string): Promise<ApiResponse<boolean>> => {
     if (config.getUseMock()) {
       const success = db.castVote(pollId, optionId, tokenStr);
       if (!success) {
@@ -167,10 +167,16 @@ export const api = {
       return simulateNetwork({ success: true, data: true });
     }
 
+    // Prepare request data
+    const requestData: any = { optionId, token: tokenStr };
+    if (openId) {
+      requestData.openId = openId;
+    }
+
     return remoteFetch<boolean>(`/api/polls/${encodeURIComponent(pollId)}/vote`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ optionId, token: tokenStr }),
+      body: JSON.stringify(requestData),
     });
   },
 
