@@ -107,7 +107,7 @@ export const CreatePoll: React.FC<CreatePollProps> = ({ onCreated, onCancel }) =
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="block w-full rounded-lg border-gray-300 border px-4 py-3 text-lg focus:ring-indigo-500 focus:border-indigo-500 shadow-sm outline-none"
+                className="block w-full rounded-lg border-gray-300 text-gray-600 border px-4 py-3 text-lg focus:ring-indigo-500 focus:border-indigo-500 shadow-sm outline-none"
                 placeholder="请输入投票主题..."
               />
             </div>
@@ -124,7 +124,7 @@ export const CreatePoll: React.FC<CreatePollProps> = ({ onCreated, onCancel }) =
                     required
                     value={option}
                     onChange={(e) => handleOptionChange(index, e.target.value)}
-                    className="block flex-1 rounded-lg border-gray-300 border px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm outline-none"
+                    className="block flex-1 rounded-lg text-gray-600 border-gray-300 border px-4 py-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm outline-none"
                     placeholder={`选项 ${index + 1}`}
                   />
                   {options.length > 2 && (
