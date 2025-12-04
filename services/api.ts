@@ -1,6 +1,7 @@
-import { Poll, ApiResponse, QRToken } from '../types';
+import { Poll, ApiResponse, QRToken, LoginRequest, RegisterRequest, LoginResponse, User } from '../types';
 import { db } from './mockDb';
 import { config } from './config';
+import { storageService } from './storageService';
 
 // Helper to simulate network latency (100ms - 500ms)
 const simulateNetwork = <T>(data: T): Promise<T> => {
@@ -14,7 +15,25 @@ const simulateNetwork = <T>(data: T): Promise<T> => {
 const remoteFetch = async <T = any>(path: string, init?: RequestInit): Promise<ApiResponse<T>> => {
   try {
     const url = config.makeUrl(path);
-    const res = await fetch(url, init);
+    const token = storageService.getToken();
+    
+    // Create headers with token if available
+    const headers = {
+      ...(init?.headers || {}),
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    };
+    
+    const res = await fetch(url, {
+      ...init,
+      headers
+    });
+    
+    // Handle 401 (Unauthorized) - clear token and redirect to login
+    if (res.status === 401) {
+      storageService.logout();
+      window.location.hash = '/login';
+    }
+    
     const contentType = res.headers.get('content-type') || '';
     if (contentType.includes('application/json')) {
       const json = await res.json();
@@ -30,6 +49,50 @@ const remoteFetch = async <T = any>(path: string, init?: RequestInit): Promise<A
 };
 
 export const api = {
+  // Authentication
+  login: async (credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> => {
+    if (config.getUseMock()) {
+      // Mock login - always succeed for development
+      const mockUser: User = {
+        id: '123',
+        username: credentials.username,
+        email: `${credentials.username}@example.com`,
+        createdAt: Date.now()
+      };
+      return simulateNetwork({
+        success: true,
+        data: {
+          access_token: 'mock-token',
+          token_type: 'bearer',
+          user: mockUser
+        }
+      });
+    }
+    return remoteFetch<LoginResponse>('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials)
+    });
+  },
+
+  register: async (userData: RegisterRequest): Promise<ApiResponse<User>> => {
+    if (config.getUseMock()) {
+      // Mock register
+      const mockUser: User = {
+        id: Date.now().toString(),
+        username: userData.username,
+        email: userData.email,
+        createdAt: Date.now()
+      };
+      return simulateNetwork({ success: true, data: mockUser });
+    }
+    return remoteFetch<User>('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    });
+  },
+
   // Polls
   getPolls: async (): Promise<ApiResponse<Poll[]>> => {
     if (config.getUseMock()) {

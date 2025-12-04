@@ -14,6 +14,7 @@ export interface Poll {
   options: PollOptionWithCount[];
   createdAt: number;
   isActive: boolean;
+  createdBy: string;
 }
 
 export interface VoteRecord {
@@ -34,6 +35,31 @@ export interface QRToken {
 export interface Route {
   path: 'list' | 'create' | 'display' | 'vote' | 'wechat-qr-test';
   params: Record<string, string>;
+}
+
+// User types
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  createdAt: number;
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+  user: User;
 }
 
 // API Response Wrappers
