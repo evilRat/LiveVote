@@ -298,7 +298,7 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
         {/* Left Column: QR Codes and Controls */}
         <div className="lg:col-span-4 flex flex-col gap-6">
           {/* QR Codes Section */}
-          <div className={`rounded-2xl p-6 border shadow-xl backdrop-blur-sm flex flex-col ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-gray-300'}`}>
+          <div className={`h-full rounded-2xl p-6 border shadow-xl backdrop-blur-sm flex flex-col ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-gray-300'}`}>
             <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
               <span className={`w-2 h-8 rounded-full ${theme === 'dark' ? 'bg-green-500' : 'bg-green-400'}`}></span>
               扫码投票
@@ -319,7 +319,7 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
                         <img 
                           src={wechatQRCode} 
                           alt="微信小程序二维码" 
-                          className="w-40 h-40 object-contain"
+                          className="w-100 h-100 object-contain"
                         />
                       </div>
                     </div>
@@ -362,7 +362,7 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
             {/* QR Code Instructions */}
             <div className={`mt-6 pt-4 ${theme === 'dark' ? 'border-t border-slate-700' : 'border-t border-gray-300'}`}>
               <p className={`text-sm text-center ${theme === 'dark' ? 'text-slate-400' : 'text-gray-500'}`}>
-                二维码单次有效，扫码后自动刷新。请使用对应方式扫码参与投票。
+                二维码单次有效，扫码后自动刷新。
               </p>
             </div>
             
@@ -407,7 +407,7 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
         </div>
 
         {/* Right Column: Results */}
-        <div className={`lg:col-span-7 rounded-2xl p-8 border shadow-xl backdrop-blur-sm flex flex-col ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-gray-300'}`}>
+        <div className={`lg:col-span-8 rounded-2xl p-8 border shadow-xl backdrop-blur-sm flex flex-col ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-gray-300'}`}>
           <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
             <span className={`w-2 h-8 rounded-full ${theme === 'dark' ? 'bg-indigo-500' : 'bg-indigo-400'}`}></span>
             实时结果
