@@ -11,6 +11,7 @@ export const MockSettings: React.FC = () => {
   const [apiBase, setApiBaseState] = useState<string>('');
   const [showQrUrl, setShowQrUrlState] = useState<boolean>(false);
   const [showSimulateVote, setShowSimulateVoteState] = useState<boolean>(false); // 新增状态
+  const [useMiniProgramQR, setUseMiniProgramQRState] = useState<boolean>(true); // 新增使用小程序二维码状态
   const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -18,6 +19,7 @@ export const MockSettings: React.FC = () => {
     setApiBaseState(config.getApiBase());
     setShowQrUrlState(config.getShowQrUrl());
     setShowSimulateVoteState(config.getShowSimulateVote()); // 初始化状态
+    setUseMiniProgramQRState(config.getUseMiniProgramQR()); // 初始化使用小程序二维码状态
     setShowButton(false); // 确保每次组件挂载时都隐藏齿轮按钮
   }, []);
 
@@ -46,6 +48,7 @@ export const MockSettings: React.FC = () => {
       config.setApiBase(apiBase);
       config.setShowQrUrl(showQrUrl);
       config.setShowSimulateVote(showSimulateVote); // 保存新配置
+      config.setUseMiniProgramQR(useMiniProgramQR); // 保存使用小程序二维码配置
       setMsg('已保存');
       setTimeout(() => setMsg(null), 2000);
     } catch (e) {
@@ -96,6 +99,16 @@ export const MockSettings: React.FC = () => {
                 />
               </label>
 
+              {/* 新增使用小程序二维码开关 */}
+              <label className="flex items-center justify-between mb-3">
+                <span className="text-sm">使用小程序二维码</span>
+                <input
+                  type="checkbox"
+                  checked={useMiniProgramQR}
+                  onChange={(e) => setUseMiniProgramQRState(e.target.checked)}
+                />
+              </label>
+
               <label className="block text-sm text-slate-300">后端 API 域名</label>
               <input
                 className="mt-1 w-full px-2 py-1 rounded bg-slate-700 text-white text-sm border border-slate-600"
@@ -110,6 +123,7 @@ export const MockSettings: React.FC = () => {
                   setApiBaseState(config.getApiBase()); 
                   setShowQrUrlState(config.getShowQrUrl());
                   setShowSimulateVoteState(config.getShowSimulateVote()); // 重置状态
+                  setUseMiniProgramQRState(config.getUseMiniProgramQR()); // 重置使用小程序二维码状态
                 }}>重置</Button>
                 <Button 
                   variant="outline" 

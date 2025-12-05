@@ -206,8 +206,6 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
     );
   }
 
-  const voteUrl = `${window.location.origin}${window.location.pathname}#/vote/${pollId}/${currentToken}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(voteUrl)}&bgcolor=ffffff&color=0f172a`;
   const wechatUrl = wechatQRData ? `pages/vote/index?pollId=${wechatQRData.poll_id}&token=${wechatQRData.token}` : '';
 
   // 修改模拟投票的逻辑，确保在投票后刷新微信二维码
@@ -319,58 +317,104 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
             </h3>
             
             <div className="grid flex-1 items-center">              
-              {/* WeChat Mini Program QR Code */}
-              <div className="flex flex-col items-center">
-                {loadingWechatQR ? (
-                  <div className="flex items-center justify-center w-44 h-44">
-                    <div className={`animate-spin h-8 w-8 border-4 border-t-transparent rounded-full ${theme === 'dark' ? 'border-green-500' : 'border-green-400'}`}></div>
-                  </div>
-                ) : wechatQRCode ? (
-                  <>
-                    <div className="relative group mb-3">
-                      <div className={`absolute -inset-1 rounded-xl blur opacity-25 transition duration-1000 ${theme === 'dark' ? 'bg-gradient-to-r from-green-500 to-teal-500 group-hover:opacity-50' : 'bg-gradient-to-r from-green-400 to-teal-400 group-hover:opacity-40'}`}></div>
-                      <div className={`relative p-3 rounded-xl shadow-2xl ${theme === 'dark' ? 'bg-white' : 'bg-gray-100'}`}>
-                        <img 
-                          src={wechatQRCode} 
-                          alt="微信小程序二维码" 
-                          className="w-100 h-100 object-contain"
-                        />
+              {/* QR Code Display Logic */}
+              {config.getUseMiniProgramQR() ? (
+                <div className="flex flex-col items-center">
+                  {loadingWechatQR ? (
+                    <div className="flex items-center justify-center w-44 h-44">
+                      <div className={`animate-spin h-8 w-8 border-4 border-t-transparent rounded-full ${theme === 'dark' ? 'border-green-500' : 'border-green-400'}`}></div>
+                    </div>
+                  ) : wechatQRCode ? (
+                    <>
+                      <div className="relative group mb-3">
+                        <div className={`absolute -inset-1 rounded-xl blur opacity-25 transition duration-1000 ${theme === 'dark' ? 'bg-gradient-to-r from-green-500 to-teal-500 group-hover:opacity-50' : 'bg-gradient-to-r from-green-400 to-teal-400 group-hover:opacity-40'}`}></div>
+                        <div className={`relative p-3 rounded-xl shadow-2xl ${theme === 'dark' ? 'bg-white' : 'bg-gray-100'}`}>
+                          <img 
+                            src={wechatQRCode} 
+                            alt="微信小程序二维码" 
+                            className="w-100 h-100 object-contain"
+                          />
+                        </div>
                       </div>
+                      
+                      <div className="text-center">
+                        <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs border ${theme === 'dark' ? 'bg-green-500/10 text-green-300 border-green-500/20' : 'bg-green-100 text-green-800 border-green-200'}`}>
+                          <Smartphone size={14} />
+                          <span className="font-medium">微信扫码</span>
+                        </div>
+                        <p className={`text-xs mt-2 ${theme === 'dark' ? 'text-slate-400' : 'text-gray-500'}`}>使用微信扫描进入小程序</p>
+                      </div>
+                    </>
+                  ) : (
+                    <div className={`flex flex-col items-center justify-center w-44 h-44 rounded-xl ${theme === 'dark' ? 'bg-slate-700' : 'bg-gray-200'}`}>
+                      <span className={`text-sm mb-2 ${theme === 'dark' ? 'text-slate-400' : 'text-gray-500'}`}>二维码加载失败</span>
+                      <button 
+                        onClick={() => {
+                          // 重新加载微信二维码
+                          if (pollId && currentToken) {
+                            setLoadingWechatQR(true);
+                            api.generateWechatQRCode(pollId, currentToken).then(res => {
+                              if (res.success && res.data) {
+                                setWechatQRCode(res.data.qr_image);
+                              }
+                              setLoadingWechatQR(false);
+                            }).catch(() => {
+                              setLoadingWechatQR(false);
+                            });
+                          }
+                        }}
+                        className={`text-xs px-2 py-1 rounded ${theme === 'dark' ? 'bg-slate-600 hover:bg-slate-500' : 'bg-gray-300 hover:bg-gray-400'}`}
+                      >
+                        重新加载
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <div className="grid grid-cols-2 gap-6 mb-4">
+                    {/* Step 1: Mini Program Promotion QR Code */}
+                    <div className="flex flex-col items-center">
+                      <div className={`mb-2 px-3 py-1 rounded-full text-xs font-medium ${theme === 'dark' ? 'bg-blue-500/20 text-blue-300' : 'bg-blue-100 text-blue-800'}`}>
+                        第一步
+                      </div>
+                      <div className="relative group mb-3">
+                        <div className={`absolute -inset-1 rounded-xl blur opacity-25 transition duration-1000 ${theme === 'dark' ? 'bg-gradient-to-r from-blue-500 to-indigo-500 group-hover:opacity-50' : 'bg-gradient-to-r from-blue-400 to-indigo-400 group-hover:opacity-40'}`}></div>
+                        <div className={`relative p-3 rounded-xl shadow-2xl ${theme === 'dark' ? 'bg-white' : 'bg-gray-100'}`}>
+                          <img 
+                            src="/images/mini-program-promo-qr.jpg" 
+                            alt="小程序推广二维码" 
+                            className="w-64 h-64 object-contain"
+                          />
+                        </div>
+                      </div>
+                      <p className={`text-xs text-center ${theme === 'dark' ? 'text-slate-400' : 'text-gray-500'}`}>扫描打开小程序</p>
                     </div>
                     
-                    <div className="text-center">
-                      <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs border ${theme === 'dark' ? 'bg-green-500/10 text-green-300 border-green-500/20' : 'bg-green-100 text-green-800 border-green-200'}`}>
-                        <Smartphone size={14} />
-                        <span className="font-medium">微信扫码</span>
+                    {/* Step 2: Poll ID and Token QR Code */}
+                    <div className="flex flex-col items-center">
+                      <div className={`mb-2 px-3 py-1 rounded-full text-xs font-medium ${theme === 'dark' ? 'bg-blue-500/20 text-blue-300' : 'bg-blue-100 text-blue-800'}`}>
+                        第二步
                       </div>
-                      <p className={`text-xs mt-2 ${theme === 'dark' ? 'text-slate-400' : 'text-gray-500'}`}>使用微信扫描进入小程序</p>
+                      <div className="relative group mb-3">
+                        <div className={`absolute -inset-1 rounded-xl blur opacity-25 transition duration-1000 ${theme === 'dark' ? 'bg-gradient-to-r from-blue-500 to-indigo-500 group-hover:opacity-50' : 'bg-gradient-to-r from-blue-400 to-indigo-400 group-hover:opacity-40'}`}></div>
+                        <div className={`relative p-3 rounded-xl shadow-2xl ${theme === 'dark' ? 'bg-white' : 'bg-gray-100'}`}>
+                          <img 
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(`${pollId}/${currentToken}`)}`} 
+                            alt="投票参数二维码" 
+                            className="w-64 h-64 object-contain"
+                          />
+                        </div>
+                      </div>
+                      <p className={`text-xs text-center ${theme === 'dark' ? 'text-slate-400' : 'text-gray-500'}`}>扫描进入投票页面</p>
                     </div>
-                  </>
-                ) : (
-                  <div className={`flex flex-col items-center justify-center w-44 h-44 rounded-xl ${theme === 'dark' ? 'bg-slate-700' : 'bg-gray-200'}`}>
-                    <span className={`text-sm mb-2 ${theme === 'dark' ? 'text-slate-400' : 'text-gray-500'}`}>二维码加载失败</span>
-                    <button 
-                      onClick={() => {
-                        // 重新加载微信二维码
-                        if (pollId && currentToken) {
-                          setLoadingWechatQR(true);
-                          api.generateWechatQRCode(pollId, currentToken).then(res => {
-                            if (res.success && res.data) {
-                              setWechatQRCode(res.data.qr_image);
-                            }
-                            setLoadingWechatQR(false);
-                          }).catch(() => {
-                            setLoadingWechatQR(false);
-                          });
-                        }
-                      }}
-                      className={`text-xs px-2 py-1 rounded ${theme === 'dark' ? 'bg-slate-600 hover:bg-slate-500' : 'bg-gray-300 hover:bg-gray-400'}`}
-                    >
-                      重新加载
-                    </button>
                   </div>
-                )}
-              </div>
+                  
+                  <div className={`text-xs text-center px-4 py-3 rounded-lg ${theme === 'dark' ? 'bg-slate-700' : 'bg-gray-100'}`}>
+                    先扫描左侧小程序二维码，打开小程序主页后点击「扫码投票」按钮，再扫描右侧二维码进入投票页面
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* QR Code Instructions */}
@@ -402,13 +446,6 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
           {config.getShowQrUrl() && (
             <div className={`rounded-2xl p-6 border shadow-xl backdrop-blur-sm ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-gray-300'}`}>
               <div className="space-y-4">
-                <div>
-                  <p className={`text-xs mb-2 uppercase tracking-wider ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>网页二维码链接</p>
-                  <div className={`rounded-lg p-3 overflow-auto ${theme === 'dark' ? 'bg-slate-900/50 border border-slate-700' : 'bg-gray-100 border border-gray-300'}`}>
-                    <code className={`text-xs break-all font-mono ${theme === 'dark' ? 'text-slate-300' : 'text-gray-700'}`}>{voteUrl}</code>
-                  </div>
-                </div>
-                
                 <div>
                   <p className={`text-xs mb-2 uppercase tracking-wider ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>小程序页面路径</p>
                   <div className={`rounded-lg p-3 overflow-auto ${theme === 'dark' ? 'bg-slate-900/50 border border-slate-700' : 'bg-gray-100 border border-gray-300'}`}>

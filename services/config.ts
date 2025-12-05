@@ -3,6 +3,7 @@ export const CONFIG_KEYS = {
   API_BASE: 'livevote_apiBase',
   SHOW_QR_URL: 'livevote_showQrUrl',
   SHOW_SIMULATE_VOTE: 'livevote_showSimulateVote', // 新增模拟投票开关配置键
+  USE_MINI_PROGRAM_QR: 'livevote_useMiniProgramQR', // 新增使用小程序二维码开关配置键
 };
 
 // export const DEFAULT_API_BASE = 'https://zyz.qdcto.com';
@@ -82,6 +83,25 @@ export const config = {
   setShowSimulateVote: (val: boolean) => {
     try {
       localStorage.setItem(CONFIG_KEYS.SHOW_SIMULATE_VOTE, val ? 'true' : 'false');
+    } catch (e) {
+      console.error('Failed to save config', e);
+    }
+  },
+
+  // 新增使用小程序二维码开关的getter和setter
+  getUseMiniProgramQR: (): boolean => {
+    try {
+      const v = localStorage.getItem(CONFIG_KEYS.USE_MINI_PROGRAM_QR);
+      if (v === null) return true; // default to true (使用小程序二维码)
+      return v === 'true';
+    } catch (e) {
+      return true;
+    }
+  },
+
+  setUseMiniProgramQR: (val: boolean) => {
+    try {
+      localStorage.setItem(CONFIG_KEYS.USE_MINI_PROGRAM_QR, val ? 'true' : 'false');
     } catch (e) {
       console.error('Failed to save config', e);
     }
