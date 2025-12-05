@@ -5,6 +5,7 @@ import { Settings, ExternalLink } from 'lucide-react';
 
 export const MockSettings: React.FC = () => {
   const [open, setOpen] = useState(false);
+  const [showButton, setShowButton] = useState(false); // 控制齿轮按钮是否显示，初始为隐藏
   const [useMock, setUseMockState] = useState<boolean>(true);
   const [apiBase, setApiBaseState] = useState<string>('');
   const [showQrUrl, setShowQrUrlState] = useState<boolean>(false);
@@ -16,6 +17,26 @@ export const MockSettings: React.FC = () => {
     setApiBaseState(config.getApiBase());
     setShowQrUrlState(config.getShowQrUrl());
     setShowSimulateVoteState(config.getShowSimulateVote()); // 初始化状态
+    setShowButton(false); // 确保每次组件挂载时都隐藏齿轮按钮
+  }, []);
+
+  // 添加键盘事件监听，实现alt+shift+k快捷键
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // 检查是否同时按下了alt+shift+k
+      if (event.altKey && event.shiftKey && event.key === 'K') {
+        event.preventDefault(); // 阻止默认行为
+        setShowButton(prev => !prev); // 切换齿轮按钮的显示状态
+      }
+    };
+
+    // 添加事件监听
+    window.addEventListener('keydown', handleKeyPress);
+
+    // 组件卸载时移除事件监听
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
   }, []);
 
   const save = () => {
@@ -99,13 +120,15 @@ export const MockSettings: React.FC = () => {
             </div>
           )}
 
-          <button
-            className="p-3 rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-700"
-            onClick={() => setOpen(o => !o)}
-            title="打开调试设置"
-          >
-            <Settings />
-          </button>
+          {showButton && (
+            <button
+              className="p-3 rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-700"
+              onClick={() => setOpen(o => !o)}
+              title="打开调试设置"
+            >
+              <Settings />
+            </button>
+          )}
         </div>
       </div>
     </div>
