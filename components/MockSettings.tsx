@@ -27,8 +27,8 @@ export const MockSettings: React.FC = () => {
   // 添加键盘事件监听，实现alt+shift+k快捷键
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      // 检查是否同时按下了alt+shift+k
-      if (event.altKey && event.shiftKey && event.key === 'K') {
+      // 检查是否同时按下了alt+shift+k 或者 cmd+shift+k
+      if ((event.altKey || event.metaKey) && event.shiftKey && event.key === 'K') {
         event.preventDefault(); // 阻止默认行为
         setShowButton(prev => !prev); // 切换齿轮按钮的显示状态
       }
