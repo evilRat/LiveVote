@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from './Button';
 import { config } from '../services/config';
+import { api } from '../services/api';
 import { Settings, ExternalLink } from 'lucide-react';
 
 export const MockSettings: React.FC = () => {
@@ -102,7 +103,7 @@ export const MockSettings: React.FC = () => {
                 onChange={(e) => setApiBaseState(e.target.value)}
               />
 
-              <div className="mt-3 flex items-center gap-2">
+              <div className="mt-3 flex flex-wrap items-center gap-2">
                 <Button variant="secondary" onClick={save}>保存</Button>
                 <Button variant="ghost" onClick={() => { 
                   setUseMockState(config.getUseMock()); 
@@ -110,6 +111,24 @@ export const MockSettings: React.FC = () => {
                   setShowQrUrlState(config.getShowQrUrl());
                   setShowSimulateVoteState(config.getShowSimulateVote()); // 重置状态
                 }}>重置</Button>
+                <Button 
+                  variant="outline" 
+                  onClick={async () => {
+                    try {
+                      const result = await api.refreshWechatAccessToken();
+                      if (result.success) {
+                        setMsg('小程序Token已刷新');
+                      } else {
+                        setMsg(`刷新失败: ${result.error}`);
+                      }
+                    } catch (error) {
+                      setMsg(`刷新失败: ${error}`);
+                    }
+                    setTimeout(() => setMsg(null), 2000);
+                  }}
+                >
+                  刷新小程序Token
+                </Button>
                 <a className="ml-auto text-xs text-slate-300 flex items-center gap-1" href="/docs/API_BACKEND.md" target="_blank" rel="noreferrer">
                   文档
                   <ExternalLink size={14} />

@@ -5,8 +5,8 @@ export const CONFIG_KEYS = {
   SHOW_SIMULATE_VOTE: 'livevote_showSimulateVote', // 新增模拟投票开关配置键
 };
 
-export const DEFAULT_API_BASE = 'https://zyz.qdcto.com';
-// export const DEFAULT_API_BASE = 'http://127.0.0.1:8000';
+// export const DEFAULT_API_BASE = 'https://zyz.qdcto.com';
+export const DEFAULT_API_BASE = 'http://127.0.0.1:8000';
 
 export const config = {
   getUseMock: (): boolean => {

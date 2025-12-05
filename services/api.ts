@@ -183,11 +183,12 @@ export const api = {
   // WeChat Mini Program QR Code
   generateWechatQRCode: async (pollId: string, currentToken: string): Promise<ApiResponse<{qr_image: string, poll_id: string, token: string}>> => {
     if (config.getUseMock()) {
-      // Mock implementation
+      // Mock implementation - 使用scene参数格式以匹配getwxacodeunlimit接口
+      const scene = `pollId=${pollId}&token=${currentToken}`;
       return simulateNetwork({ 
         success: true, 
         data: {
-          qr_image: `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(`pages/vote/index?pollId=${pollId}&token=${currentToken}`)}`,
+          qr_image: `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(`pages/vote/index?scene=${encodeURIComponent(scene)}`)}`,
           poll_id: pollId,
           token: currentToken
         } 
@@ -207,6 +208,19 @@ export const api = {
 
     return remoteFetch<boolean>(`/api/polls/${encodeURIComponent(pollId)}`, { method: 'DELETE' });
   },
+
+  // WeChat Mini Program Access Token Refresh
+  refreshWechatAccessToken: async (): Promise<ApiResponse<{ access_token: string }>> => {
+    if (config.getUseMock()) {
+      // Mock implementation
+      return simulateNetwork({ 
+        success: true, 
+        data: { access_token: 'mock-access-token-refreshed' } 
+      });
+    }
+    return remoteFetch<{ access_token: string }>('/api/refresh-wechat-token', { method: 'POST' });
+  },
+
 };
 
 export default api;
