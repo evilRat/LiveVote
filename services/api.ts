@@ -104,7 +104,7 @@ export const api = {
 
   getPoll: async (id: string, last_total_votes?: number): Promise<ApiResponse<Poll>> => {
     if (config.getUseMock()) {
-      const poll = db.getPoll(id);
+      const poll = db.getPollById(id);
       if (!poll) return simulateNetwork({ success: false, error: 'Poll not found' });
       return simulateNetwork({ success: true, data: poll });
     }
@@ -123,6 +123,7 @@ export const api = {
         options: options.map((text, i) => ({ id: `opt_${Date.now()}_${i}`, text, count: 0 })), // mock 模式下仍需包含 count 字段
         createdAt: Date.now(),
         isActive: true,
+        createdBy: 'mock-user', // 添加 createdBy 字段
       };
       db.createPoll(newPoll);
       return simulateNetwork({ success: true, data: newPoll });
@@ -144,13 +145,13 @@ export const api = {
     return remoteFetch<string>(`/api/polls/${encodeURIComponent(pollId)}/tokens`, { method: 'POST' });
   },
 
-  checkTokenStatus: async (tokenStr: string): Promise<ApiResponse<QRToken>> => {
+  checkTokenStatus: async (tokenStr: string, longPolling: boolean = true): Promise<ApiResponse<QRToken>> => {
     if (config.getUseMock()) {
       const token = db.getToken(tokenStr);
       if (!token) return simulateNetwork({ success: false, error: 'Token invalid' });
       return simulateNetwork({ success: true, data: token });
     }
-    return remoteFetch<QRToken>(`/api/tokens/${encodeURIComponent(tokenStr)}`);
+    return remoteFetch<QRToken>(`/api/tokens/${encodeURIComponent(tokenStr)}?long_polling=${longPolling}`);
   },
 
   markTokenScanned: async (tokenStr: string): Promise<ApiResponse<boolean>> => {

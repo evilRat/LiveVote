@@ -19,8 +19,8 @@ export const VotingInterface: React.FC<VotingInterfaceProps> = ({ pollId, token 
     let isMounted = true;
 
     const init = async () => {
-      // 1. Validate Token
-      const tokenRes = await api.checkTokenStatus(token);
+      // 1. Validate Token - 不使用长轮询，只需要立即检查token状态
+      const tokenRes = await api.checkTokenStatus(token, false);
       
       if (!isMounted) return;
 
