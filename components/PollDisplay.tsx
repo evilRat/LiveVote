@@ -35,7 +35,7 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
     const fetchPollData = async () => {
       try {
         // 使用长轮询，传递lastTotalVotes作为参数
-        const response = await api.getPoll(pollId, lastTotalVotes > 0 ? lastTotalVotes : undefined);
+        const response = await api.getPoll(pollId, lastTotalVotes >= 0 ? lastTotalVotes : undefined);
         if (!isMounted) return;
 
         if (response.success && response.data) {
