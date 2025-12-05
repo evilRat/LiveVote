@@ -102,13 +102,17 @@ export const api = {
     return remoteFetch<Poll[]>('/api/polls');
   },
 
-  getPoll: async (id: string): Promise<ApiResponse<Poll>> => {
+  getPoll: async (id: string, last_total_votes?: number): Promise<ApiResponse<Poll>> => {
     if (config.getUseMock()) {
-      const poll = db.getPollById(id);
-      if (!poll) return simulateNetwork({ success: false, error: '活动未找到' });
+      const poll = db.getPoll(id);
+      if (!poll) return simulateNetwork({ success: false, error: 'Poll not found' });
       return simulateNetwork({ success: true, data: poll });
     }
-    return remoteFetch<Poll>(`/api/polls/${encodeURIComponent(id)}`);
+    // 添加长轮询参数到URL
+    const url = last_total_votes !== undefined ? 
+      `/api/polls/${encodeURIComponent(id)}?last_total_votes=${last_total_votes}` : 
+      `/api/polls/${encodeURIComponent(id)}`;
+    return remoteFetch<Poll>(url);
   },
 
   createPoll: async (title: string, options: string[]): Promise<ApiResponse<Poll>> => {

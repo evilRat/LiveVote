@@ -26,13 +26,15 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
   const [loadingWechatQR, setLoadingWechatQR] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark'); // 主题状态
 
-  // 1. Data Fetching (Results)
+  // 1. Data Fetching (Results) - Long Polling
   useEffect(() => {
     let isMounted = true;
+    let lastTotalVotes = -1; // 用于检测数据变化
     
     const fetchPollData = async () => {
       try {
-        const response = await api.getPoll(pollId);
+        // 使用长轮询，传递lastTotalVotes作为参数
+        const response = await api.getPoll(pollId, lastTotalVotes > 0 ? lastTotalVotes : undefined);
         if (!isMounted) return;
 
         if (response.success && response.data) {
@@ -46,7 +48,9 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
           }));
           
           setResults(res);
-          setTotalVotes(p.options.reduce((acc, curr) => acc + curr.count, 0));
+          const newTotalVotes = p.options.reduce((acc, curr) => acc + curr.count, 0);
+          setTotalVotes(newTotalVotes);
+          lastTotalVotes = newTotalVotes; // 更新最后已知的总票数
           setError(null);
         } else {
           // Only show error if we haven't successfully loaded data yet
@@ -62,26 +66,27 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
             return prev;
           });
         }
+      } finally {
+        // 无论成功还是失败，立即发起下一次请求（长轮询）
+        if (isMounted) {
+          fetchPollData();
+        }
       }
     };
 
     fetchPollData();
-    // Short polling for "real-time" feeling
-    const interval = setInterval(fetchPollData, 2000);
 
     return () => {
       isMounted = false;
-      clearInterval(interval);
     };
   }, [pollId]);
 
-  // 2. Token Management (QR Code Rotation)
+  // 2. Token Management (QR Code Rotation) - Long Polling
   useEffect(() => {
     // Don't generate tokens if there is a main error
     if (error || !pollId) return;
 
     let isMounted = true;
-    let checkInterval: number;
 
     const initToken = async () => {
       try {
@@ -91,6 +96,10 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
         }
       } catch (e) {
         console.error("Token generation failed", e);
+        // 失败后重试
+        if (isMounted) {
+          setTimeout(initToken, 1000);
+        }
       }
     };
 
@@ -101,8 +110,9 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
         
         if (isMounted && res.success && res.data) {
           const status = res.data.status;
+          
+          // 如果token状态发生变化，生成新的token
           if (status === 'scanned' || status === 'used') {
-            // Token consumed, generate new one immediately
             const newRes = await api.generateToken(pollId);
             if (newRes.success && newRes.data) {
               setCurrentToken(newRes.data);
@@ -111,18 +121,22 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
         }
       } catch (e) {
         console.error("Token check failed", e);
+      } finally {
+        // 无论成功还是失败，立即发起下一次请求（长轮询）
+        if (isMounted && currentToken) {
+          checkTokenStatus();
+        }
       }
     };
 
     if (!currentToken) {
       initToken();
     } else {
-      checkInterval = window.setInterval(checkTokenStatus, 1000);
+      checkTokenStatus();
     }
 
     return () => {
       isMounted = false;
-      clearInterval(checkInterval);
     };
   }, [pollId, currentToken, error]);
 
