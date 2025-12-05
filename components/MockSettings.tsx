@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from './Button';
 import { config } from '../services/config';
 import { api } from '../services/api';
-import { Settings, ExternalLink } from 'lucide-react';
+import { Settings, ExternalLink, RefreshCw } from 'lucide-react';
 
 export const MockSettings: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -13,6 +13,7 @@ export const MockSettings: React.FC = () => {
   const [showSimulateVote, setShowSimulateVoteState] = useState<boolean>(false); // 新增状态
   const [useMiniProgramQR, setUseMiniProgramQRState] = useState<boolean>(true); // 新增使用小程序二维码状态
   const [msg, setMsg] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   useEffect(() => {
     setUseMockState(config.getUseMock());
@@ -49,6 +50,12 @@ export const MockSettings: React.FC = () => {
       config.setShowQrUrl(showQrUrl);
       config.setShowSimulateVote(showSimulateVote); // 保存新配置
       config.setUseMiniProgramQR(useMiniProgramQR); // 保存使用小程序二维码配置
+      
+      // 触发自定义事件，通知其他组件配置已变化
+      window.dispatchEvent(new CustomEvent('lv-config-changed', {
+        detail: { key: 'USE_MINI_PROGRAM_QR' }
+      }));
+      
       setMsg('已保存');
       setTimeout(() => setMsg(null), 2000);
     } catch (e) {
@@ -126,8 +133,10 @@ export const MockSettings: React.FC = () => {
                   setUseMiniProgramQRState(config.getUseMiniProgramQR()); // 重置使用小程序二维码状态
                 }}>重置</Button>
                 <Button 
-                  variant="outline" 
+                  variant="secondary" 
+                  isLoading={isRefreshing}
                   onClick={async () => {
+                    setIsRefreshing(true);
                     try {
                       const result = await api.refreshWechatAccessToken();
                       if (result.success) {
@@ -137,11 +146,13 @@ export const MockSettings: React.FC = () => {
                       }
                     } catch (error) {
                       setMsg(`刷新失败: ${error}`);
+                    } finally {
+                      setIsRefreshing(false);
+                      setTimeout(() => setMsg(null), 2000);
                     }
-                    setTimeout(() => setMsg(null), 2000);
                   }}
                 >
-                  刷新小程序Token
+                  刷新wxToken
                 </Button>
                 <a className="ml-auto text-xs text-slate-300 flex items-center gap-1" href="/docs/API_BACKEND.md" target="_blank" rel="noreferrer">
                   文档

@@ -25,6 +25,7 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
   const [wechatQRData, setWechatQRData] = useState<{poll_id: string, token: string} | null>(null); // 微信二维码数据
   const [loadingWechatQR, setLoadingWechatQR] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark'); // 主题状态
+  const [configChanged, setConfigChanged] = useState(0); // 用于触发重新渲染的状态
 
   // 1. Data Fetching (Results) - Long Polling
   useEffect(() => {
@@ -183,6 +184,39 @@ export const PollDisplay: React.FC<PollDisplayProps> = ({ pollId, onBack }) => {
       document.body.classList.add('light-theme');
     }
   }, [theme]);
+
+  // 监听配置变化的 effect
+  useEffect(() => {
+    // 监听 localStorage 变化事件
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'LV_USE_MINI_PROGRAM_QR') {
+        setConfigChanged(prev => prev + 1);
+      }
+    };
+
+    // 监听自定义配置变化事件
+    const handleCustomConfigChange = (e: CustomEvent) => {
+      if (e.detail.key === 'USE_MINI_PROGRAM_QR') {
+        setConfigChanged(prev => prev + 1);
+      }
+    };
+
+    // 添加事件监听
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('lv-config-changed', handleCustomConfigChange as EventListener);
+
+    // 清理事件监听
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('lv-config-changed', handleCustomConfigChange as EventListener);
+    };
+  }, []);
+
+  // 添加一个直接检查配置变化的 effect
+  useEffect(() => {
+    // 这个 effect 会在组件重新渲染时检查配置是否变化
+    // 确保当配置变化时能正确显示二维码
+  }, [configChanged]);
 
   if (error) {
     return (
