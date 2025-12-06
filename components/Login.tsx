@@ -174,7 +174,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               <Button
                 type="submit"
                 fullWidth
-                loading={loading}
+                isLoading={loading}
                 disabled={loading}
               >
                 {isLogin ? '登录' : '注册'}
