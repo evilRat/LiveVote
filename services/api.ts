@@ -187,18 +187,6 @@ export const api = {
 
   // WeChat Mini Program QR Code
   generateWechatQRCode: async (pollId: string, currentToken: string): Promise<ApiResponse<{qr_image: string, poll_id: string, token: string}>> => {
-    if (config.getUseMock()) {
-      // Mock implementation - 使用scene参数格式以匹配getwxacodeunlimit接口
-      const scene = `pollId=${pollId}&token=${currentToken}`;
-      return simulateNetwork({ 
-        success: true, 
-        data: {
-          qr_image: `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(`pages/vote/index?scene=${encodeURIComponent(scene)}`)}`,
-          poll_id: pollId,
-          token: currentToken
-        } 
-      });
-    }
     return remoteFetch<{qr_image: string, poll_id: string, token: string}>(`/api/polls/${encodeURIComponent(pollId)}/${encodeURIComponent(currentToken)}/wechat-qr`, { method: 'POST' });
   },
 
