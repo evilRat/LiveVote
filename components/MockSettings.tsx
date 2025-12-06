@@ -28,7 +28,7 @@ export const MockSettings: React.FC = () => {
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       // 检查是否同时按下了alt+shift+k 或者 cmd+shift+k
-      if ((event.altKey || event.metaKey) && event.shiftKey && event.key === 'K') {
+      if ((event.altKey || event.metaKey) && event.shiftKey && event.key.toUpperCase() === 'K') {
         event.preventDefault(); // 阻止默认行为
         setShowButton(prev => !prev); // 切换齿轮按钮的显示状态
       }
